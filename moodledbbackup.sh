@@ -10,6 +10,7 @@
 # @author: Matt Gleeson <matt@mattgleeson.net>
 # @version: 1.01
 # @lastmodified: 24/07/2015
+# @license: GPL2
 ######
 
 ##### ROOT CHECK
