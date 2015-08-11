@@ -9,7 +9,7 @@
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
 # @version: 1.01
-# @lastmodified: 24/07/2015
+# @lastmodified: 06/08/2015
 # @license: GPL2
 ######
 
@@ -88,7 +88,7 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 ### 
 _now=$(date +%Y-%m-%d--%H%M%S)
 _file="${BACKUPPATH}${dbname}_backup_${_now}.sql"
-_zipfile="${_file}.tar.gz"
+_zipfile="${BACKUPPATH}${_file}.tar.gz"
 _host=
 
 #${mysqlpath}mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "$_file"
