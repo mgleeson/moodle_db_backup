@@ -8,41 +8,112 @@
 # stampted sql files (optionally zipped)
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 0.01
-# @lastmodified: 04/02/2015 - not finished yet
-# @license: GPL2
+# @version: 1.01
+# @lastmodified: 24/07/2015
 ######
-set -o nounset
-set -o errexit
 
-exit # remove this when complete - safety catch to prevent possible inadvertent abuse of your pets, loved ones, and general catastrophe
+##### ROOT CHECK
+# must run as root
+Check_if_root ()
+{
+if [ "$(id -u)" != "0" ]; then
+    echo "current UID = $(id -u) -- Root UID = 0"
+     echo "Must be root to run this script."
+     exit 1
+  fi
+}
 
-#todo check for root
+Check_if_root
+##### END ROOT CHECK
 
-# todo: check for exist of mdl_conf?  create and ensure root readable only? then include into this file, delele at end
-# or dump output of command into this file? what is best practice?
 
-# todo: do a getops thing to grab input for location of moodle install - use getops if more than one input neeted?  or just use $1 $2? Decisions...
+#### Check for previous moodle config vars file
+if [ -e ~/mdl_conf.sh ]; then
+        rm -f ~/mdl_conf.sh
+		echo "existing mdl_conf removed [OK]"
+fi
 
-# enter relevant values for the 3 variables below
-mysqlUsername=""
-mysqlPasswd="" # leave blank like this if you wish to be prompted for password instead
-mysqlDbName=""
-pathToMoodleConfig=""
-#^ getting this from the below:
 
-grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(\w*)(?:\x27)(?=\;)' ${pathToMoodleConfig}/config.php | sed 's/\s//g' | sed 's/\x27/"/g' >> ~/mdl_conf.sh
-#^ if using dump to a file for this and not dumping to tmp or root home or something, make sure to have script check for where it is so that is not in insecure location
+#mdl_path="/home/cstcresource/public_html/technip/hse"
 
-mysqlpath=""
-backuppath=""
-#^ need to get this from input and/or set from defaults...doing later
 
-###
+##### PARAMETERS/ARGUMENTS PARSER
+for PARAMS in "$@"
+do
+case $PARAMS in
+    -e=*|--moodlepath=*)
+    MOODLEPATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    -s=*|--backuppath=*)
+    BACKUPPATH="${i#*=}"
+    shift # past argument=value
+    ;;
+    -l=*|--sendemail=*)
+    SENDEMAIL="${i#*=}"
+    shift # past argument=value
+    ;;
+    --default)
+    DEFAULT=YES
+    shift # past argument with no value
+    ;;
+    *)
+           echo "USAGE: \n moodle_db_backup.sh [--moodlepath=PATH]  [--backuppath=PATH]  [--sendemail=YES/NO]  [EMAILADDRESS1] [EMAILADDRESS2] [EMAILADDRESS3]"
+			exit 1 # TODO: this doesn't work
+    ;;
+esac
+done
+echo "MOODLE PATH     = ${MOODLEPATH}"
+echo "BACKUP PATH     = ${BACKUPPATH}"
+echo "SENDING EMAIL?  = ${SENDEMAIL}"
+
+
+if [[ -n $1 ]]; then
+    echo "email1 specified: $1"
+fi
+if [[ -n $2 ]]; then
+    echo "email2 specified: $1"
+fi
+if [[ -n $3 ]]; then
+    echo "email3 specified: $1"
+fi
+##### END PARAMETERS/ARGUMENTS PARSER
+
+## Get the config details from the Moodle config.php file and put in temp file
+grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/config.php | sed 's/\s//g' | sed 's/\x27/"/g' >> ~/mdl_conf.sh
+. ~/mdl_conf.sh
+
+
+### 
 _now=$(date +%Y-%m-%d--%H%M%S)
-_file="${backuppath}${mysqlDbName}_backup_$_now.sql"
-${mysqlpath}mysqldump -u ${mysqlUsername} -p${mysqlPasswd} ${mysqlDbName} > "$_file"
-tar -zcf ${_file}.tar.gz ${_file} 
-#todo: delete .sql after tgz confirmed success
-#todo: optionally email file?
+_file="${BACKUPPATH}${dbname}_backup_${_now}.sql"
+_zipfile="${_file}.tar.gz"
+_host=
 
+#${mysqlpath}mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "$_file"
+#${mysqlpath}mysqldump -u ${mysqlUsername} -p${mysqlPasswd} ${mysqlDbName} > "$_file"
+
+
+echo "backing up database with name: ${dbname}"
+# TODO: test for mysqldump - eg which mysqldump
+mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "$_file"
+tar -zcf ${_zipfile} ${_file} && rm -f $_file # remove sql file on zip complete if successful TODO: implement proper check for zip success
+# optionally email file?
+
+echo "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" >> ~/msg.txt
+echo "attempting to email backup using file: ${_zipfile}"
+
+# TODO: test for mutt - eg which mutt
+mutt -s "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" -a ${_zipfile} -- $1 < ~/msg.txt
+
+### Get rid of mdl_conf when finished
+if [ -e ~/mdl_conf.sh ]; then
+        rm -f ~/mdl_conf.sh
+		echo "existing mdl_conf removed [OK]"
+fi
+
+### Get rid of msg.txt when finished
+if [ -e ~/msg.txt ]; then
+        rm -f ~/msg.txt.sh
+		echo "existing msg.txt removed [OK]"
+fi
