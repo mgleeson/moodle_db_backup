@@ -35,7 +35,6 @@ if [ -e ~/mdl_conf.sh ]; then
 fi
 
 
-#mdl_path="/home/cstcresource/public_html/technip/hse"
 
 
 ##### PARAMETERS/ARGUMENTS PARSER
