@@ -8,10 +8,19 @@
 # stampted sql files (optionally zipped)
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.01
-# @lastmodified: 06/08/2015
+# @version: 1.03
 # @license: GPL2
 ######
+
+version="version: 1.03"
+
+############
+# Usage
+usage="\
+Usage: moodledbbackup [-h] [--help] [--moodlepath=PATH] [--backuppath=PATH][--sendemail=YES/NO]  
+       [--emailaddress=email@domain][--version]"
+
+		
 
 ##### ROOT CHECK
 # must run as root
@@ -28,6 +37,9 @@ Check_if_root
 ##### END ROOT CHECK
 
 
+
+
+
 #### Check for previous moodle config vars file
 if [ -e ~/mdl_conf.sh ]; then
         rm -f ~/mdl_conf.sh
@@ -41,26 +53,29 @@ fi
 for PARAMS in "$@"
 do
 case $PARAMS in
-    -e=*|--moodlepath=*)
+    -m=*|--moodlepath=*)
     MOODLEPATH="${i#*=}"
     shift # past argument=value
     ;;
-    -s=*|--backuppath=*)
+    -b=*|--backuppath=*)
     BACKUPPATH="${i#*=}"
     shift # past argument=value
     ;;
-    -l=*|--sendemail=*)
+    -s=*|--sendemail=*)
     SENDEMAIL="${i#*=}"
     shift # past argument=value
     ;;
-    --default)
-    DEFAULT=YES
-    shift # past argument with no value
-    ;;
-    *)
-           echo "USAGE: \n moodle_db_backup.sh [--moodlepath=PATH]  [--backuppath=PATH]  [--sendemail=YES/NO]  [EMAILADDRESS1] [EMAILADDRESS2] [EMAILADDRESS3]"
-			exit 1 # TODO: this doesn't work
-    ;;
+    --version | --v* )
+         show_version=yes; shift ;;
+      -- )     # Stop option processing
+        shift; break ;;
+      - )	# Use stdin as input.
+        break ;;
+      -* )
+        echo "${usage}" 1>&2; exit 1 ;;
+      * )
+        break ;;
+
 esac
 done
 echo "MOODLE PATH     = ${MOODLEPATH}"
@@ -78,6 +93,15 @@ if [[ -n $3 ]]; then
     echo "email3 specified: $1"
 fi
 ##### END PARAMETERS/ARGUMENTS PARSER
+
+##### check to see if email address specified if email set to yes
+if [[ ! -n ${SENDEMAIL} ]]; then
+	if [ ! -n "$1" ]; then
+			echo "mysql_install() requires the root pass as its first argument"
+			return 1;
+		fi
+fi
+
 
 ## Get the config details from the Moodle config.php file and put in temp file
 grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/config.php | sed 's/\s//g' | sed 's/\x27/"/g' >> ~/mdl_conf.sh
