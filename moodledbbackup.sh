@@ -29,7 +29,7 @@ Usage: 	moodledbbackup [-h] [--help] [-m][--moodlepath=PATH] [-b][--backuppath=P
 function err_exit
 {
 	echo ""
-	echo "$1" 1>&2
+	echo "$@" 1>&2
 	echo "error at line: ${LINENO}"
 	exit 1
 }		
@@ -57,22 +57,24 @@ if [ -e ~/mdl_conf.sh ]; then
 fi
 
 
-
+EMAILADDRESS=" " # setting default
 
 ##### PARAMETERS/ARGUMENTS PARSER
 for PARAMS in "$@"
 do
 case $PARAMS in
     -m=*|--moodlepath=*)
-    MOODLEPATH="${i#*=}"
+    MOODLEPATH="${PARAMS#*=}"
+	MOODLEPATH=${MOODLEPATH%/}
     shift 
     ;;
     -b=*|--backuppath=*)
-    BACKUPPATH="${i#*=}"
+    BACKUPPATH="${PARAMS#*=}"
+	BACKUPPATH=${BACKUPPATH%/}
     shift 
     ;;
     -e=*|--email=*)
-    EMAILADDRESS="${i#*=}"
+    EMAILADDRESS="${PARAMS#*=}"
     shift 
     ;;
     --version|-v*)
@@ -92,7 +94,7 @@ done
 
 echo "MOODLE PATH     = ${MOODLEPATH}"
 echo "BACKUP PATH     = ${BACKUPPATH}"
-echo "SENDING EMAIL?  = ${EMAILADDRESS}"
+
 echo -e ""
 
 if [ ! -n "${MOODLEPATH}" ]; then
@@ -114,8 +116,8 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 
 ### 
 _now=$(date +%Y-%m-%d--%H%M%S)
-_file="${BACKUPPATH}${dbname}_backup_${_now}.sql"
-_zipfile="${BACKUPPATH}${_file}.tar.gz"
+_file="${BACKUPPATH}/${dbname}_backup_${_now}.sql"
+_zipfile="${_file}.tar.gz"
 #_host=  # todo: allow for hosts other than localhost
 
 #${mysqlpath}mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "$_file"
@@ -134,40 +136,52 @@ mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
           fi
      fi
 
-## zip the sql file	 
+echo "${_zipfile} ${_file}"
+	 
+## zip the sql file
 tar -zcf ${_zipfile} ${_file} 
      if [ $? -eq 0 ]; then # if OK
           echo "tar [OK]"
 		  # remove sql file on zip complete if successful
 		  rm -f ${_file} || err_exit
      else
-          if [ $? != 127 ]; then
-               echo "ERROR! tar not found?"
+               echo "ERROR! something went wrong with tar"
                err_exit
-          fi
+          
      fi
 
 
 echo ""
 
-# optionally email file
-echo "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" >> ~/msg.txt
-echo "attempting to email backup using file: ${_zipfile}"
+## optionally email dump file
+if [[ ${EMAILADDRESS} != " " ]] ; then
+	validemailregex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+	if [[ ${EMAILADDRESS} =~ ${validemailregex} ]] ; then
+		echo "valid email address [OK]"
+		echo "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" >> ~/msg.txt
+		echo "attempting to email backup using file: ${_zipfile}"
 
-whichmutt=`which mutt`
-whichmutt=$?
-if [ $whichmutt != 0 ]
-	then
-		echo "Mutt is required for sending emails"
-		echo "Please install if you wish to use email function"
-		echo "On Debian based systems:"
-		echo "sudo apt-get install mutt"
-		echo "On RHEL based systems:"
-		echo "yum install mutt"
-		err_exit
+		whichmutt=`which mutt`
+		whichmutt=$?
+		if [ $whichmutt != 0 ]
+			then
+				echo "Mutt is required for sending emails"
+				echo "Please install if you wish to use email function"
+				echo "On Debian based systems:"
+				echo "sudo apt-get install mutt"
+				echo "On RHEL based systems:"
+				echo "yum install mutt"
+				err_exit
+			else
+				mutt -s "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" -a ${_zipfile} -- ${EMAILADDRESS} < ~/msg.txt || err_exit
+		fi
 	else
-		mutt -s "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" -a ${_zipfile} -- ${EMAILADDRESS} < ~/msg.txt || err_exit
+		echo "the supplied email address, ${EMAILADDRESS} is not a valid email address"
+		err_exit
+	fi
 fi
+### END EMAIL
+
 
 ### Get rid of mdl_conf when finished
 if [ -e ~/mdl_conf.sh ]; then
