@@ -12,7 +12,7 @@
 # @license: GPL2
 ######
 
-set -u
+# set -u # disabling for the moment to let some tests function
 
 
 
@@ -91,11 +91,11 @@ case $PARAMS in
 esac
 done
 
-
+echo && echo
 echo "MOODLE PATH     = ${MOODLEPATH}"
 echo "BACKUP PATH     = ${BACKUPPATH}"
+echo && echo
 
-echo -e ""
 
 if [ ! -n "${MOODLEPATH}" ]; then
 			 echo "no moodle path specified?"
