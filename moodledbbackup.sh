@@ -115,7 +115,7 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 
 
 ### 
-_sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -p${dbpass} -s -N`
+_sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -p${dbpass} -s -N | tr '/' '-' | tr ' ' '_'`
 _now=$(date +%Y-%m-%d--%H%M%S)
 _file="${BACKUPPATH}/${_sitename}_${dbname}_backup_${_now}.sql"
 _zipfile="${_file}.tar.gz"
