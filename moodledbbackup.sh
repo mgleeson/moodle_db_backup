@@ -8,7 +8,7 @@
 # stampted sql files (optionally zipped)
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.04
+# @version: 1.05
 # @license: GPL2
 ######
 
@@ -16,7 +16,7 @@
 
 
 
-versionno="version: 1.04"
+versionno="version: 1.05"
 
 ############
 # Usage
@@ -115,8 +115,9 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 
 
 ### 
+_sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -p${dbpass} -s -N`
 _now=$(date +%Y-%m-%d--%H%M%S)
-_file="${BACKUPPATH}/${dbname}_backup_${_now}.sql"
+_file="${BACKUPPATH}/${_sitename}_${dbname}_backup_${_now}.sql"
 _zipfile="${_file}.tar.gz"
 #_host=  # todo: allow for hosts other than localhost
 
