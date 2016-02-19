@@ -30,7 +30,7 @@ function err_exit
 {
 	echo ""
 	echo "$@" 1>&2
-	echo "[${red}error${rst}] at line: ${LINENO}"
+	echo -e "[${red}error${rst}] at line: ${LINENO}"
 	exit 1
 }		
 
@@ -46,7 +46,7 @@ Check_if_root ()
 {
 if [ "$(id -u)" != "0" ]; then
     echo "current UID = $(id -u) -- Root UID = 0"
-     echo "[${red}ERROR!${rst}] Must be root to run this script."
+     echo -e "[${red}ERROR!${rst}] Must be root to run this script."
      err_exit
   fi
 }
@@ -59,7 +59,7 @@ Check_if_root
 #### Check for previous moodle config vars file
 if [ -e ~/mdl_conf.sh ]; then
         rm -f ~/mdl_conf.sh || err_exit
-		echo "existing mdl_conf removed [${green}OK${rst}]"
+		echo -e "existing mdl_conf removed [${green}OK${rst}]"
 fi
 
 
@@ -104,21 +104,21 @@ echo && echo
 
 
 if [ ! -n "${MOODLEPATH}" ]; then
-			 echo "[${red}ERROR!${rst}] no moodle path specified?"
+			 echo -e "[${red}ERROR!${rst}] no moodle path specified?"
 			 err_exit;
 fi
 if [ ! -n "${BACKUPPATH}" ]; then
-			 echo "[${red}ERROR!${rst}] no backup path specified?"
+			 echo -e "[${red}ERROR!${rst}] no backup path specified?"
 			 err_exit;
 fi
 
 if [ ! -d "${MOODLEPATH}" ]; then
-			 echo "[${red}ERROR!${rst}] Moodle path does not exist!"
+			 echo -e "[${red}ERROR!${rst}] Moodle path does not exist!"
 			 err_exit;
 fi
 
 if [ ! -d "${BACKUPPATH}" ]; then
-			 echo "[${red}ERROR!${rst}] Backup path does not exist!"
+			 echo -e "[${red}ERROR!${rst}] Backup path does not exist!"
 			 err_exit;
 fi
 
@@ -148,10 +148,10 @@ echo "backing up database with name: ${dbname}"
 # TODO: test for mysqldump - eg which mysqldump
 mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
      if [ $? -eq 0 ]; then # if OK
-          echo "mysqldump [${green}OK${rst}]"
+          echo -e "mysqldump [${green}OK${rst}]"
      else
           if [ $? != 127 ]; then
-               echo "[${red}ERROR!${rst}] mysqldump operation failed for some reason"
+               echo -e "[${red}ERROR!${rst}] mysqldump operation failed for some reason"
                err_exit
           fi
      fi
@@ -161,11 +161,11 @@ echo "${_zipfile} ${_file}"
 ## zip the sql file
 tar -zcf ${_zipfile} ${_file} 
      if [ $? -eq 0 ]; then # if OK
-          echo "tar [${green}OK${rst}]"
+          echo -e "tar [${green}OK${rst}]"
 		  # remove sql file on zip complete if successful
 		  rm -f ${_file} || err_exit
      else
-               echo "[${red}ERROR!${rst}] something went wrong with tar"
+               echo -e "[${red}ERROR!${rst}] something went wrong with tar"
                err_exit
           
      fi
@@ -177,7 +177,7 @@ echo ""
 if [[ ${EMAILADDRESS} != " " ]] ; then
 	validemailregex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
 	if [[ ${EMAILADDRESS} =~ ${validemailregex} ]] ; then
-		echo "valid email address [${green}OK${rst}]"
+		echo -e "valid email address [${green}OK${rst}]"
 		echo "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" >> ~/msg.txt
 		echo "attempting to email backup using file: ${_zipfile}"
 
@@ -185,7 +185,7 @@ if [[ ${EMAILADDRESS} != " " ]] ; then
 		whichmutt=$?
 		if [ $whichmutt != 0 ]
 			then
-				echo "[${red}ERROR!${rst}] Mutt is required for sending emails"
+				echo -e "[${red}ERROR!${rst}] Mutt is required for sending emails"
 				echo "Please install if you wish to use email function"
 				echo "On Debian based systems:"
 				echo "sudo apt-get install mutt"
@@ -196,7 +196,7 @@ if [[ ${EMAILADDRESS} != " " ]] ; then
 				mutt -s "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" -a ${_zipfile} -- ${EMAILADDRESS} < ~/msg.txt || err_exit
 		fi
 	else
-		echo "[${red}ERROR!${rst}] the supplied email address, ${EMAILADDRESS} is not a valid email address"
+		echo -e "[${red}ERROR!${rst}] the supplied email address, ${EMAILADDRESS} is not a valid email address"
 		err_exit
 	fi
 fi
@@ -207,7 +207,7 @@ fi
 if [ -e ~/mdl_conf.sh ]; then
         rm -f ~/mdl_conf.sh 
 			if [ $? -eq 0 ]; then # if OK
-			  echo "mdl_conf removed [${green}OK${rst}]"
+			  echo -e "mdl_conf removed [${green}OK${rst}]"
 			else
 			   err_exit
 			fi
@@ -219,7 +219,7 @@ fi
 if [ -e ~/msg.txt ]; then
         rm -f ~/msg.txt.sh
 		if [ $? -eq 0 ]; then # if OK
-			echo "existing msg.txt removed [${green}OK${rst}]"
+			echo -e "existing msg.txt removed [${green}OK${rst}]"
 		else
 		   err_exit
 		fi
