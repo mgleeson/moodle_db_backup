@@ -16,7 +16,7 @@
 
 
 
-versionno="version: 1.05.01"
+versionno="version: 1.05.02"
 
 ############
 # Usage
@@ -30,9 +30,15 @@ function err_exit
 {
 	echo ""
 	echo "$@" 1>&2
-	echo "error at line: ${LINENO}"
+	echo "[${red}error${rst}] at line: ${LINENO}"
 	exit 1
 }		
+
+## For OK and ERROR output colouring
+red='\033[01;31m'
+blue='\033[01;34m'
+green='\033[01;32m'
+rst='\033[00m'
 		
 ##### ROOT CHECK
 # must run as root
@@ -40,7 +46,7 @@ Check_if_root ()
 {
 if [ "$(id -u)" != "0" ]; then
     echo "current UID = $(id -u) -- Root UID = 0"
-     echo "Must be root to run this script."
+     echo "[${red}ERROR!${rst}] Must be root to run this script."
      err_exit
   fi
 }
@@ -53,7 +59,7 @@ Check_if_root
 #### Check for previous moodle config vars file
 if [ -e ~/mdl_conf.sh ]; then
         rm -f ~/mdl_conf.sh || err_exit
-		echo "existing mdl_conf removed [OK]"
+		echo "existing mdl_conf removed [${green}OK${rst}]"
 fi
 
 
@@ -98,21 +104,21 @@ echo && echo
 
 
 if [ ! -n "${MOODLEPATH}" ]; then
-			 echo "no moodle path specified?"
+			 echo "[${red}ERROR!${rst}] no moodle path specified?"
 			 err_exit;
 fi
 if [ ! -n "${BACKUPPATH}" ]; then
-			 echo "no backup path specified?"
+			 echo "[${red}ERROR!${rst}] no backup path specified?"
 			 err_exit;
 fi
 
 if [ ! -d "${MOODLEPATH}" ]; then
-			 echo "Moodle path does not exist!"
+			 echo "[${red}ERROR!${rst}] Moodle path does not exist!"
 			 err_exit;
 fi
 
 if [ ! -d "${BACKUPPATH}" ]; then
-			 echo "Backup path does not exist!"
+			 echo "[${red}ERROR!${rst}] Backup path does not exist!"
 			 err_exit;
 fi
 
@@ -132,6 +138,8 @@ _file="${BACKUPPATH}/${_sitename}_${dbname}_backup_${_now}.sql"
 _zipfile="${_file}.tar.gz"
 #_host=  # todo: allow for hosts other than localhost
 
+
+
 #${mysqlpath}mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "$_file"
 #${mysqlpath}mysqldump -u ${mysqlUsername} -p${mysqlPasswd} ${mysqlDbName} > "$_file"
 
@@ -140,10 +148,10 @@ echo "backing up database with name: ${dbname}"
 # TODO: test for mysqldump - eg which mysqldump
 mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
      if [ $? -eq 0 ]; then # if OK
-          echo "mysqldump [OK]"
+          echo "mysqldump [${green}OK${rst}]"
      else
           if [ $? != 127 ]; then
-               echo "ERROR! mysqldump not found?"
+               echo "[${red}ERROR!${rst}] mysqldump operation failed for some reason"
                err_exit
           fi
      fi
@@ -153,11 +161,11 @@ echo "${_zipfile} ${_file}"
 ## zip the sql file
 tar -zcf ${_zipfile} ${_file} 
      if [ $? -eq 0 ]; then # if OK
-          echo "tar [OK]"
+          echo "tar [${green}OK${rst}]"
 		  # remove sql file on zip complete if successful
 		  rm -f ${_file} || err_exit
      else
-               echo "ERROR! something went wrong with tar"
+               echo "[${red}ERROR!${rst}] something went wrong with tar"
                err_exit
           
      fi
@@ -169,7 +177,7 @@ echo ""
 if [[ ${EMAILADDRESS} != " " ]] ; then
 	validemailregex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
 	if [[ ${EMAILADDRESS} =~ ${validemailregex} ]] ; then
-		echo "valid email address [OK]"
+		echo "valid email address [${green}OK${rst}]"
 		echo "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" >> ~/msg.txt
 		echo "attempting to email backup using file: ${_zipfile}"
 
@@ -177,7 +185,7 @@ if [[ ${EMAILADDRESS} != " " ]] ; then
 		whichmutt=$?
 		if [ $whichmutt != 0 ]
 			then
-				echo "Mutt is required for sending emails"
+				echo "[${red}ERROR!${rst}] Mutt is required for sending emails"
 				echo "Please install if you wish to use email function"
 				echo "On Debian based systems:"
 				echo "sudo apt-get install mutt"
@@ -188,7 +196,7 @@ if [[ ${EMAILADDRESS} != " " ]] ; then
 				mutt -s "${HOSTNAME} Moodle DB backup for ${dbname} at ${_now}" -a ${_zipfile} -- ${EMAILADDRESS} < ~/msg.txt || err_exit
 		fi
 	else
-		echo "the supplied email address, ${EMAILADDRESS} is not a valid email address"
+		echo "[${red}ERROR!${rst}] the supplied email address, ${EMAILADDRESS} is not a valid email address"
 		err_exit
 	fi
 fi
@@ -199,7 +207,7 @@ fi
 if [ -e ~/mdl_conf.sh ]; then
         rm -f ~/mdl_conf.sh 
 			if [ $? -eq 0 ]; then # if OK
-			  echo "mdl_conf removed [OK]"
+			  echo "mdl_conf removed [${green}OK${rst}]"
 			else
 			   err_exit
 			fi
@@ -211,7 +219,7 @@ fi
 if [ -e ~/msg.txt ]; then
         rm -f ~/msg.txt.sh
 		if [ $? -eq 0 ]; then # if OK
-			echo "existing msg.txt removed [OK]"
+			echo "existing msg.txt removed [${green}OK${rst}]"
 		else
 		   err_exit
 		fi
