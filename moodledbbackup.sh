@@ -16,7 +16,7 @@
 
 
 
-versionno="version: 1.05"
+versionno="version: 1.05.01"
 
 ############
 # Usage
@@ -105,6 +105,17 @@ if [ ! -n "${BACKUPPATH}" ]; then
 			 echo "no backup path specified?"
 			 err_exit;
 fi
+
+if [ ! -d "${MOODLEPATH}" ]; then
+			 echo "Moodle path does not exist!"
+			 err_exit;
+fi
+
+if [ ! -d "${BACKUPPATH}" ]; then
+			 echo "Backup path does not exist!"
+			 err_exit;
+fi
+
 ##### END PARAMETERS/ARGUMENTS PARSER
 
 
