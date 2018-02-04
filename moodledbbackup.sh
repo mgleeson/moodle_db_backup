@@ -8,7 +8,7 @@
 # stampted sql files (optionally zipped)
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.05
+# @version: 1.1
 # @license: GPL2
 ######
 
@@ -16,12 +16,12 @@
 
 
 
-versionno="version: 1.05.02"
+versionno="version: 1.1"
 
 ############
 # Usage
 usage="\
-Usage: 	moodledbbackup [-h] [--help] [-m][--moodlepath=PATH] [-b][--backuppath=PATH]
+Usage: 	moodledbbackup [-h] [--help] [-m][--moodlepath=PATH] [-b][--backuppath=PATH] 
 		[-e][--email=EMAILADDRESS] [--version]"
 
 		
@@ -134,9 +134,9 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 ### 
 _sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -p${dbpass} -s -N | tr '/' '-' | tr ' ' '_'`
 _now=$(date +%Y-%m-%d--%H%M%S)
-_file="${BACKUPPATH}/${_sitename}_${dbname}_backup_${_now}.sql"
+_file="${BACKUPPATH}/${_sitename}_DB_${dbname}_backup_${_now}.sql"
 _zipfile="${_file}.tar.gz"
-#_host=  # todo: allow for hosts other than localhost
+
 
 
 
@@ -146,7 +146,7 @@ _zipfile="${_file}.tar.gz"
 echo ""
 echo "backing up database with name: ${dbname}"
 # TODO: test for mysqldump - eg which mysqldump
-mysqldump -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
+mysqldump -h ${dbhost} -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
      if [ $? -eq 0 ]; then # if OK
           echo -e "mysqldump [${green}OK${rst}]"
      else
