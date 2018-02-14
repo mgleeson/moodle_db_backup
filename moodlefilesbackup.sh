@@ -2,7 +2,7 @@
 ######
 # moodlefilesbackup.sh
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.01
+# @version: 1.02
 # @license: GPL2
 ######
 versionno="version: 1.02"
