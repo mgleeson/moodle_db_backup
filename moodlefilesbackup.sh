@@ -146,7 +146,7 @@ else
         # backup moodledata
         echo -e "${info} Starting backup of ${dataroot} Moodle data directory of site ${_sitename} timestamped at datetime $_now"
         #tar -vczf ${_data_zipfile} ${dataroot}
-        tar zcf - ${dataroot} -P | pv -s $(du -sb ${dataroot} | awk '{print $1}') | gzip > ${_data_zipfile}
+        tar cf - ${dataroot} -P | pv -s $(du -sb ${dataroot} | awk '{print $1}') | gzip > ${_data_zipfile}
         checkerr "$_" "$?"
 
         echo || echo
