@@ -9,9 +9,6 @@ versionno="version: 1.02"
 
 # set -u
 
-. /root/scripts/checkerr.inc.sh
-
-
 ############
 ## Usage
 usage="\
@@ -19,14 +16,57 @@ Usage:  moodlefilesbackup [-h] [--help] [-m][--moodlepath=PATH] [-b][--backuppat
                 [-e][--email=EMAILADDRESS] [--version]"
 
 
-##### for when stuff go wrong
-function err_exit
+##########################################################################
+## ERR HANDLING & GENERAL PURPOSE GOODNESS
+
+_date=$(date +%Y-%m-%d)
+
+##### for when stuff go wrong and we have nowhere else to go
+##### ...for the night is dark and full of errors
+err_exit () 
 {
-        echo ""
-        echo "$@" 1>&2
-        echo "error at line: ${LINENO}"
-        exit 1
+	echo ""
+	echo "$@" 1>&2
+	echo -e "[\033[01;31m error \033[00m] at line: ${LINENO}"
+	exit 1
 }
+
+#### where are we?
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "${DIR}" ]]; then DIR="${PWD}"; fi
+
+
+## TODO: do check/download function for other dependencies also 
+
+#### include for error checker function and output colouring
+load_checkerr ()
+{
+## is checkerr here?
+if [ -e ${DIR}/checkerr.inc.sh ]; then
+	echo -e "[\033[01;32m  OK  \033[00m]     checkerr found"
+	. "${DIR}/checkerr.inc.sh"
+else
+	echo -e "[\033[01;31m  WARNING  \033[00m]     checkerr not found"
+	echo -e "${info} don't worry, I get it for you... getting..."
+	wget -O checkerr.inc.sh http://bit.ly/checkerr-sh
+	. "${DIR}/checkerr.inc.sh"
+	if [[ "${checkerr_loaded}" == "true" ]] 
+		then
+		echo -e "${ok} checkerr downloaded and loaded"
+	else
+		echo -e "[\033[01;31m  ERROR  \033[00m]      dependency not downloaded and not loaded: checkerr.inc.sh"
+		err_exit
+	fi
+	
+fi
+}
+
+load_checkerr
+## TODO: make checker universal and pass script name via argument
+
+## END ERR HANDLING
+##########################################################################
+
 
 ##### ROOT CHECK
 
