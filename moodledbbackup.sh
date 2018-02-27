@@ -127,7 +127,7 @@ fi
 
 
 ## Get the config details from the Moodle config.php file and put in temp file
-grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/config.php | sed 's/\s//g' | sed 's/\x27/"/g' > ~/mdl_conf.sh || err_exit
+grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/config.php | sed 's/\s//g' > ~/mdl_conf.sh || err_exit
 . ~/mdl_conf.sh
 
 
