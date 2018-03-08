@@ -48,7 +48,7 @@ if [ -e ${DIR}/checkerr.inc.sh ]; then
 else
 	echo -e "[\033[01;31m  WARNING  \033[00m]     checkerr not found"
 	echo -e "${info} don't worry, I get it for you... getting..."
-	wget -O checkerr.inc.sh http://bit.ly/checkerr-sh
+	wget -O checkerr.inc.sh https://gist.githubusercontent.com/mgleeson/80876fd2a7779d9f96ca4a11996681f0/raw/checkerr.inc.sh
 	. "${DIR}/checkerr.inc.sh"
 	if [[ "${checkerr_loaded}" == "true" ]] 
 		then
