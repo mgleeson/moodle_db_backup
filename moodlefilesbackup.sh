@@ -178,7 +178,7 @@ else
         # backup the moodle files
         echo -e "${info} Starting backup of ${MOODLEPATH} directory of site ${_sitename} timestamped at datetime $_now"
         #tar -vczf ${_files_zipfile} ${MOODLEPATH}
-        tar zcf - ${MOODLEPATH} -P | pv -s $(du -sb ${MOODLEPATH} | awk '{print $1}') | gzip > ${_files_zipfile}
+        tar cf - ${MOODLEPATH} -P | pv -s $(du -sb ${MOODLEPATH} | awk '{print $1}') | gzip > ${_files_zipfile}
         checkerr "$_" "$?"
 
         echo || echo
