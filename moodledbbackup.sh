@@ -132,11 +132,11 @@ grep -P -o '(?<=^\$CFG->)(\w*)\s*=\s?(?:\x27)(.*)(?:\x27)(?=\;)' ${MOODLEPATH}/c
 
 
 ### 
-_sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -p${dbpass} -h ${dbhost} -s -N | tr '/' '-' | tr ' ' '_'`
+export MYSQL_PWD="${dbpass}"  # <--- so we don't get that damn warning
+_sitename=`echo "SELECT shortname FROM ${prefix}course WHERE sortorder = 1" | mysql ${dbname} -u ${dbuser} -h ${dbhost} -s -N | tr '/' '-' | tr ' ' '_'`
 _now=$(date +%Y-%m-%d--%H%M%S)
 _file="${BACKUPPATH}/${_sitename}_DB_${dbname}_backup_${_now}.sql"
 _zipfile="${_file}.tar.gz"
-
 
 
 
@@ -146,7 +146,7 @@ _zipfile="${_file}.tar.gz"
 echo ""
 echo "backing up database with name: ${dbname}"
 # TODO: test for mysqldump - eg which mysqldump
-mysqldump -h ${dbhost} -u ${dbuser} -p${dbpass} ${dbname} > "${_file}"
+mysqldump --max_allowed_packet=2G --skip-extended-insert --net_buffer_length=50000 -h ${dbhost} -u ${dbuser} ${dbname} > "${_file}"
      if [ $? -eq 0 ]; then # if OK
           echo -e "mysqldump [${green}OK${rst}]"
      else
@@ -205,7 +205,7 @@ fi
 
 ### Get rid of mdl_conf when finished
 if [ -e ~/mdl_conf.sh ]; then
-        rm -f ~/mdl_conf.sh 
+        rm ~/mdl_conf.sh 
 			if [ $? -eq 0 ]; then # if OK
 			  echo -e "mdl_conf removed [${green}OK${rst}]"
 			else
@@ -217,7 +217,7 @@ fi
 
 ### Get rid of msg.txt when finished
 if [ -e ~/msg.txt ]; then
-        rm -f ~/msg.txt.sh
+        rm ~/msg.txt.sh
 		if [ $? -eq 0 ]; then # if OK
 			echo -e "existing msg.txt removed [${green}OK${rst}]"
 		else
