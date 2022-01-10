@@ -68,22 +68,6 @@ load_checkerr
 ##########################################################################
 
 
-##### ROOT CHECK
-
-which pv
-checkerr "$_" "$?"
-
-## must run as root
-Check_if_root ()
-{
-if [ "$(id -u)" != "0" ]; then
-    echo "current UID = $(id -u) -- Root UID = 0"
-     echo "Must be root to run this script."
-     err_exit
-  fi
-}
-Check_if_root
-##### END ROOT CHECK
 
 #### Check for previous moodle config vars file
 if [ -e ~/mdl_conf.sh ]; then
