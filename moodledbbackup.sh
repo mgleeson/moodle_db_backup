@@ -8,7 +8,7 @@
 # stampted sql files (optionally zipped)
 # ideal for automation with cron
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.1
+# @version: 1.2.0
 # @license: GPL2
 ######
 
@@ -16,7 +16,7 @@
 
 
 
-versionno="version: 1.1"
+versionno="version: 1.2.0"
 
 ############
 # Usage
@@ -40,21 +40,6 @@ blue='\033[01;34m'
 green='\033[01;32m'
 rst='\033[00m'
 		
-##### ROOT CHECK
-# must run as root
-Check_if_root ()
-{
-if [ "$(id -u)" != "0" ]; then
-    echo "current UID = $(id -u) -- Root UID = 0"
-     echo -e "[${red}ERROR!${rst}] Must be root to run this script."
-     err_exit
-  fi
-}
-
-Check_if_root
-##### END ROOT CHECK
-
-
 
 #### Check for previous moodle config vars file
 if [ -e ~/mdl_conf.sh ]; then
