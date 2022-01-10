@@ -180,7 +180,7 @@ fi
 
 ### Get rid of mdl_conf when finished
 if [ -e ~/mdl_conf.sh ]; then
-        rm -f ~/mdl_conf.sh
+        rm ~/mdl_conf.sh
                         if [ $? -eq 0 ]; then # if OK
                           echo "mdl_conf removed [OK]"
                         else
