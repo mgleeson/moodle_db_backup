@@ -2,10 +2,10 @@
 ######
 # moodlefilesbackup.sh
 # @author: Matt Gleeson <matt@mattgleeson.net>
-# @version: 1.02
+# @version: 1.2.1
 # @license: GPL2
 ######
-versionno="version: 1.02"
+versionno="version: 1.2.1"
 
 # set -u
 
@@ -161,16 +161,14 @@ else
         # start the backup
         # backup the moodle files
         echo -e "${info} Starting backup of ${MOODLEPATH} directory of site ${_sitename} timestamped at datetime $_now"
-        #tar -vczf ${_files_zipfile} ${MOODLEPATH}
-        tar cf - ${MOODLEPATH} -P | pv -s $(du -sb ${MOODLEPATH} | awk '{print $1}') | gzip > ${_files_zipfile}
+        tar -vczf ${_files_zipfile} ${MOODLEPATH}
         checkerr "$_" "$?"
 
         echo || echo
 
         # backup moodledata
         echo -e "${info} Starting backup of ${dataroot} Moodle data directory of site ${_sitename} timestamped at datetime $_now"
-        #tar -vczf ${_data_zipfile} ${dataroot}
-        tar cf - ${dataroot} -P | pv -s $(du -sb ${dataroot} | awk '{print $1}') | gzip > ${_data_zipfile}
+        tar -vczf ${_data_zipfile} ${dataroot}
         checkerr "$_" "$?"
 
         echo || echo
