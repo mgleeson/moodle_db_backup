@@ -168,7 +168,11 @@ else
 
         # backup moodledata
         echo -e "${info} Starting backup of ${dataroot} Moodle data directory of site ${_sitename} timestamped at datetime $_now"
-        tar -vczf ${_data_zipfile} ${dataroot}
+	cache="${dataroot}/cache"
+        datatemp="${dataroot}/temp"
+	trashdir="${dataroot}/trashdir"
+        echo -e "${info} Excluding ${cache}, ${datatemp}, and ${trashdir} from dataroot backup."
+        tar --exclude=${cache} --exclude=${datatemp} --exclude=${trashdir} -vczf ${_data_zipfile} ${dataroot}
         checkerr "$_" "$?"
 
         echo || echo
